@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. 订单模型动作 -->
+    <record id="action_my_order" model="ir.actions.act_window">
+        <field name="name">订单管理</field>
+        <field name="res_model">my.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                创建第一个客户订单
+            </p>
+        </field>
+    </record>
+
+    <!-- 2. 订单树视图 -->
+    <record id="view_my_order_tree" model="ir.ui.view">
+        <field name="name">my.order.tree</field>
+        <field name="model">my.order</field>
+        <field name="arch" type="xml">
+            <tree string="订单列表">
+                <field name="name" string="订单号"/>
+                <field name="partner_id" string="客户"/>
+                <field name="date_order" string="订单日期"/>
+                <field name="state" string="状态"/>
+                <field name="amount_total" string="总金额"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- 3. 订单表单视图 -->
+    <record id="view_my_order_form" model="ir.ui.view">
+        <field name="name">my.order.form</field>
+        <field name="model">my.order</field>
+        <field name="arch" type="xml">
+            <form string="订单详情">
+                <!-- 订单状态按钮 -->
+                <header>
+                    <!-- ====================== 修复开始 ====================== -->
+                    <!-- 原来：states="confirmed,done" → 现在：invisible="state not in ['confirmed','done']" -->
+                    <button name="action_draft" string="设为草稿" type="object" invisible="state not in ['confirmed','done']" class="btn-secondary"/>
+                    
+                    <!-- 原来：states="draft" → 现在：invisible="state != 'draft'" -->
+                    <button name="action_confirm" string="确认订单" type="object" invisible="state != 'draft'" class="btn-primary"/>
+                    
+                    <!-- 原来：states="confirmed" → 现在：invisible="state != 'confirmed'" -->
+                    <button name="action_done" string="完成订单" type="object" invisible="state != 'confirmed'" class="btn-success"/>
+                    <!-- ====================== 修复结束 ====================== -->
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
+                </header>  
+                <sheet>                  
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id" required="1"/>
+                            <field name="date_order"/>
+                        </group>
+                        <group>
+                            <field name="state"/>
+                            <field name="amount_total" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="订单明细">
+                            <field name="order_line_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="product_name"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                    <field name="price_subtotal" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 4. 菜单结构 -->
+    <menuitem id="menu_my_crm_root" name="客户订单管理" sequence="10"/>
+    <menuitem id="menu_my_order" name="订单列表" parent="menu_my_crm_root" action="action_my_order" sequence="1"/>
+
+    <!-- 5. 客户表单继承：关联订单标签页（100%生效版） -->
+    <record id="view_partner_form_inherit" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <!-- 定位Odoo原生「内部备注」页，在它前面插入标签页 -->
+            <xpath expr="//notebook/page[@name='internal_notes']" position="before">
+                <page string="关联订单">
+                    <field name="order_ids" readonly="1">
+                        <tree string="客户订单">
+                            <field name="name" string="订单号"/>
+                            <field name="date_order" string="订单日期"/>
+                            <field name="amount_total" string="总金额"/>
+                            <field name="state" string="状态"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
