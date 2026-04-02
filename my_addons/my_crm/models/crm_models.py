@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import UserError 
 
 # 1. 扩展Odoo原生客户模型（res.partner），添加一对多订单关联
 class ResPartner(models.Model):
@@ -22,14 +23,28 @@ class MyOrder(models.Model):
         [('draft', '草稿'), ('confirmed', '已确认'), ('done', '已完成')],
         string='状态', default='draft', tracking=True
     )
-    amount_total = fields.Float(string='订单总金额', compute='_compute_amount_total', store=True)
+ 
+    currency_id = fields.Many2one(
+    'res.currency',
+    string='Currency',
+    default=lambda self: self.env.company.currency_id
+    )
 
+    amount_total = fields.Monetary(
+        string='Total Amount',
+        currency_field='currency_id',
+        compute='_compute_amount_total',
+        store=True
+    )
+    
     # 关联客户（Many2one）
     partner_id = fields.Many2one(
         'res.partner',
         string='客户',
         required=True,
-        ondelete='cascade'
+        ondelete='cascade',
+        # 默认取当前登录用户对应的客户信息
+        default=lambda self: self.env.user.partner_id
     )
     # 订单明细（One2many，必须有！）
     order_line_ids = fields.One2many(
@@ -52,8 +67,11 @@ class MyOrder(models.Model):
             order.amount_total = sum(line.price_subtotal for line in order.order_line_ids)
     
     # 订单状态按钮
+    # 增加业务校准，避免无效订单
     def action_confirm(self):
         for order in self:
+            if not order.order_line_ids:
+                raise UserError("订单必须包含至少一条明细！")
             order.state = 'confirmed'
 
     def action_done(self):
