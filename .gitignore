@@ -1,2 +1,6 @@
 __pycache__/
 *.pyc
+
+echo "*.swp" >> .gitignore
+git add .gitignore
+git commit -m "ignore vim swap files"
