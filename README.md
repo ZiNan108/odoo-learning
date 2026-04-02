@@ -80,7 +80,7 @@ my_addons/
 1. 启动 Odoo 17
 2. 将模块放入 `addons_path`
 3. 更新模块：python3 odoo-bin -u my_crm
-4. 
+   
 ---
 
 ## 📈 项目收获
