@@ -18,10 +18,16 @@
 ### 1️⃣ 订单管理
 - 创建、编辑订单
 - 自动生成订单编号（Sequence）
+- 金额自动计算
 - 订单状态流转：
   - 草稿（Draft）
   - 已确认（Confirmed）
   - 已完成（Done）
+- API接口
+
+## API示例
+POST /api/orders  
+POST /api/create_order
 
 ---
 
