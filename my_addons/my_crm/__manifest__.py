@@ -10,6 +10,7 @@
     'depends': ['base'],
     'data': [
         'security/ir.model.access.csv',  # 新增：权限文件
+        'security/record_rule.xml',
         'data/sequence.xml',
         'views/crm_views.xml',
     ],

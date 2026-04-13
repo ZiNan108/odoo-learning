@@ -1,0 +1,12 @@
+<odoo>
+
+    <record id="order_manager_rule" model="ir.rule">
+    <!-- 只能看到自己创建的订单 -->
+    <field name="name">Order: manager see all</field>
+    <field name="model_id" ref="model_my_order"/>
+    <!-- “经理角色” -->
+    <field name="domain_force">[(1,'=',1)]</field>
+    <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+</record>
+
+</odoo>
